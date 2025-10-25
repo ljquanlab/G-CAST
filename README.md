@@ -45,7 +45,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 CMD ["--help"]
 ENTRYPOINT ["python", "app.py"]
 ```
-
+```
+docker build -t gcast:version1 .
+docker run  gcast:version1  --input_path ./Dataset/DLPFC --n_clusters 7 --sample_name 151674
+```
 
 ## Quick Start
 ```

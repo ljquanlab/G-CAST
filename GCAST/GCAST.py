@@ -91,25 +91,17 @@ class GCAST:
 
         self.model.train()
 
-        # print("CUDA available:", torch.cuda.is_available())
-        # print("CUDA device count:", torch.cuda.device_count())
-        # _ = torch.empty(1, device='cuda')  # 强制初始化 CUDA context
-        # print("CUDA RNG states before rand:", torch.cuda.get_rng_state_all())
-        # y = torch.randn(1, device='cuda')  # GPU 上生成随机数
-        # print("CUDA RNG states after rand:", torch.cuda.get_rng_state_all())
-
-
         for _ in tqdm(range(epochs)):
             # if i % 5 == 0:
             #     print("---torch.cuda.get_rng_state_all:",torch.cuda.get_rng_state_all())
 
             # print("Before rand:", torch.get_rng_state()[:10])
-            # x = torch.rand(1)  # 生成一个随机数
+            # x = torch.rand(1)  
             # print("After rand:", torch.get_rng_state()[:10])
 
             self.optimizer.zero_grad()
 
-            # 图增强得到两个视图
+
             X1, adj1 = self.graph_augment(self.X, self.adj_norm, drop_edge_rate, drop_node_rate)
             X2, adj2 = self.graph_augment(self.X, self.adj_norm, 0, 0)
 
@@ -132,7 +124,6 @@ class GCAST:
             loss_rec2 = reconstruction_loss(de_feat2, self.X)
             loss_rec = (loss_rec1 + loss_rec2)/2
 
-            # 总损失
             loss = (
                     self.rec_w * loss_rec +
                     self.constrative_w * loss_contrastive +
@@ -146,63 +137,21 @@ class GCAST:
             #     print("Early stopping triggered.")
                 break
 
-    # def save_model(self, save_model_file):
-    #     torch.save({'state_dict': self.model.state_dict()}, save_model_file)
-    #     print('Saving model to %s' % save_model_file)
+   
     def load_model(self, phase="1"):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # print(f"Using device: {self.device}")
-        # ✅ 关键修改：强制先加载到 CPU，避免 PyTorch 初始化时 CUDA 上下文未准备好
         if phase == "1":
             checkpoint = torch.load(self.model_path1, map_location="cpu")
         else:
             checkpoint = torch.load(self.model_path2, map_location="cpu")
 
-        # 再手动加载并迁移模型到 GPU
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model.to(self.device)
 
         torch.set_rng_state(checkpoint['rng_state'])
         if checkpoint.get('cuda_rng_states') is not None and torch.cuda.is_available():
             torch.cuda.set_rng_state_all(checkpoint['cuda_rng_states'])
-    # def load_model(self,  phase="1"):
-    #     # if torch.cuda.is_available():
-    #     #     torch.cuda.init()
-    #     #     _ = torch.empty(1, device='cuda')
-    #     #     torch.cuda.synchronize()
-    #     # # else:
-    #     # #     print(">>>><<<<<")
-    #     # # torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #     self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    #     print(f"Using device: {self.device}")
-    #
-    #     print(self.device)
-    #     if phase == "1":
-    #         checkpoint = torch.load(self.model_path1, map_location=self.device)
-    #         self.model.load_state_dict(checkpoint['model_state_dict'])  # 返回值不要接链式调用
-    #         torch.set_rng_state(checkpoint['rng_state'])
-    #         if checkpoint['cuda_rng_states'] is not None and torch.cuda.is_available():
-    #             torch.cuda.set_rng_state_all(checkpoint['cuda_rng_states'])
-    #     elif phase == "2":
-    #         checkpoint = torch.load(self.model_path2, map_location=self.device)
-    #         self.model.load_state_dict(checkpoint['model_state_dict'])  # 返回值不要接链式调用
-    #         torch.set_rng_state(checkpoint['rng_state'])
-    #         if checkpoint['cuda_rng_states'] is not None and torch.cuda.is_available():
-    #             torch.cuda.set_rng_state_all(checkpoint['cuda_rng_states'])
-
-    # def process(self, temperature=1.0):
-    #     self.model.eval()  #  将模型切换到评估模式，evaluation training
-    #     latent_z, _, _, _, q, feat_x, gnn_z, _ = self.model(self.X, self.adj_norm)
-    #
-    #     q = F.softmax(q / temperature, dim=1)  # temperature = 1.0 is默
-    #
-    #     latent_z = latent_z.detach().cpu().numpy()
-    #     q = q.detach().cpu().numpy()
-    #     feat_x = feat_x.detach().cpu().numpy()
-    #     gnn_z = gnn_z.detach().cpu().numpy()
-    #
-    #     return latent_z, q, feat_x, gnn_z
-
+  
     def eval_model(self):
         # checkpoint = torch.load(self.model_path, map_location=self.device)
         # self.model.load_state_dict(checkpoint['model_state_dict'])  # 返回值不要接链式调用
@@ -223,8 +172,6 @@ class GCAST:
             out_feat = de_feat.detach().cpu().numpy()
         return latent_z, out_feat, q
 
-
-
     def train_with_dec(self, epochs=1000, dec_interval=10,):
         self.train_without_dec()
         self.load_model(phase="1")
@@ -232,8 +179,6 @@ class GCAST:
         kmeans = KMeans(n_clusters=self.model.dec_cluster_n, random_state=2025,n_init=20,  init='k-means++',  max_iter=300  )
         test_z, _, _,  = self.eval_model()
         np.copy(kmeans.fit_predict(test_z))
-        #
-        # self.model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_, dtype=torch.float64, device=self.device).to(self.device).double()
         self.model.cluster_layer.data = torch.tensor(kmeans.cluster_centers_, device=self.device).float()
         self.model.train()
 
@@ -245,41 +190,29 @@ class GCAST:
                 tmp_p = target_distribution(torch.tensor(tmp_q, device=self.device)).float()
                 self.model.train()
 
-            # training model
-            # torch.set_grad_enabled(True)
             self.optimizer.zero_grad()
             latent_z, mu, logvar, de_feat,= self.model(self.X, self.adj_norm)
             out_q = self.model.dec(latent_z)
-            #
             loss_constrative = (self.constrative_loss(latent_z,latent_z,  self.adj_prob_img)
                                 + self.constrative_loss(latent_z,latent_z, self.adj)
                                 + self.constrative_loss(latent_z,latent_z, self.adj_prob_feat))*self.norm_value /3
-            # loss_constrative = (self.constrative_loss(latent_z,latent_z,  self.adj_prob_img)+
-            #                            self.constrative_loss(latent_z,latent_z, self.adj)) * self.norm_value
 
             loss_rec = reconstruction_loss(de_feat, self.X)
             # clustering KL loss
             loss_KL1 = kl_loss(mu, logvar, self.cell_num)
             loss_KL2 = F.kl_div(out_q.log(), torch.tensor(tmp_p).to(self.device)).to(self.device)
             KL = loss_KL1+loss_KL2
-            # KL = loss_KL2
-            # loss = self.gcn_w *  loss_gcn + self.dec_kl_w * KL + self.rec_w * loss_rec
             loss =  (
                     self.dec_kl_w * KL
-                    # + self.kl_w * loss_KL1
                      + self.rec_w * loss_rec
                      + self.constrative_w*loss_constrative
                      )
 
-            # total_loss = (self.gate_loss_weight( loss_rec, KL, loss_constrative)).sum()
-            # print(f"loss: {loss}, loss_kl:{KL}, loss_rec:{loss_rec}, loss_constrative:{loss_constrative}")
-            # print(f"total_loss:{total_loss}, rec:{loss_rec}, kl:{KL}, constr:{loss_constrative}")
             loss.backward()
-            # torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             self.optimizer.step()
 
             self.early_stopping2(loss, self.model, self.optimizer, )
             if self.early_stopping2.early_stop:
             #     print("Early stopping triggered.")
                 break
-            # self.load_model(phase="2")
+

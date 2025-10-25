@@ -26,6 +26,26 @@ pip install -r requirements.txt
 pip3 install torch torchvision
 pip install -r requirements.txt
 ```
+Or you can try GCAST through docker.
+```
+# Dockerfile
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+
+COPY . /app
+RUN pip install --upgrade pip
+RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["--help"]
+ENTRYPOINT ["python", "app.py"]
+```
+
 
 ## Quick Start
 ```

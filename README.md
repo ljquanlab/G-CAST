@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Quick Start
 ```
-python app.py --input_path ./Dataset/DLPFC--n_clusters 7 --sample_name 151674 
+python app.py --input_path ./Dataset/DLPFC --n_clusters 7 --sample_name 151674 
 ```
 
 

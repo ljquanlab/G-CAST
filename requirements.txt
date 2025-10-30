@@ -1,10 +1,4 @@
-uvicorn
-python-multipart
-aiofiles
-celery
-redis
-
-anndata==0.10.5.post1
+anndata==0.10.5
 fastapi==0.119.0
 h5py==3.13.0
 matplotlib==3.8.4
@@ -29,4 +23,5 @@ torchvision==0.22.1
 torchaudio==2.7.1+cu128
 tqdm==4.66.1
 umap-learn==0.5.7
+
 

@@ -28,3 +28,7 @@ Moreover, we have placed all the involved weight files and the processed spatial
 ../Dataset/v10x/cross-region/AP.pth                 # Tutorial3   <br>
 ../Dataset/Mouse/cross_platform/CrossPlatform.pth   # Tutorial4 <br>
 ../Dataset/Mouse/Mouse_EMbryo/MouseEmbryo.pth       # Tutorial5 <br>
+
+### Automatic Weight Loading in GCAST
+In GCAST, the name of the weight file is specified through the `model_name` parameter.  
+Once the corresponding weight file is placed in the correct directory, the model can automatically load the pretrained weights by simply calling `net.eval()`. 

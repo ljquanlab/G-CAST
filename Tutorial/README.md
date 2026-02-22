@@ -21,7 +21,7 @@ To illustrate the dataset organization, we use DLPFC-151674 as an example. Under
 │── truth.txt                       # ground truth labels  <br>
 
 
-Moreover, we have placed all the involved weight files and the processed spatial transcriptomics datasets under the specified directory path for convenient access and reproducibility. 
+Moreover, we have placed all the involved weight files for spatial transcriptomics datasets under the specified directory path for convenient access and reproducibility. 
 
 ../Dataset/DLPFC/151674/151674.pth                  # Tutorial1  <br>
 ../Dataset/DLPFC/subject/subject3.pth               # Tutorial2   <br>

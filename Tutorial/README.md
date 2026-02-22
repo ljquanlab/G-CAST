@@ -1,6 +1,6 @@
 
 ### Preloading of the datasets and weight files
-Before starting the tutorials in fold *Tutorial*, please access the link: https://pan.quark.cn/s/fa511e11c294, download datasets and the weight files, and place them in  *../Dataset* folder. Then you can try to start GCAST by following the related tutorials with details. 
+Before starting the tutorials in fold *Tutorial*, please access the link: https://zenodo.org/records/18723302, download datasets and the weight files, and place them in  *../Dataset* folder. Then you can try to start GCAST by following the related tutorials with details. 
 
 
 ###  The structure of datasets and the weighted models 
